@@ -48,3 +48,10 @@ CLAUDE.md
 # pnpm
 package-lock.json
 
+.env.local
+
+# skills
+.kilo
+.agents
+
+
