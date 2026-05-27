@@ -2,20 +2,20 @@ import connectDB from "@/lib/mongodb";
 import { Event } from "@/database/event.model";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
-export const runtime = "nodejs";
+// export const runtime = "nodejs";
 
 type EventPayload = Record<string, FormDataEntryValue | string | string[]>;
 
 function parseStringArray(value: unknown, fieldName: string): string[] {
   if (Array.isArray(value)) {
-    const items = value
-      .map((item) => String(item).trim())
-      .filter(Boolean);
+    const items = value.map((item) => String(item).trim()).filter(Boolean);
     if (items.length > 0) return items;
   }
 
   if (typeof value !== "string") {
-    throw new Error(`${fieldName} must be provided as a string or string array.`);
+    throw new Error(
+      `${fieldName} must be provided as a string or string array.`,
+    );
   }
 
   const trimmedValue = value.trim();
@@ -44,7 +44,9 @@ function parseStringArray(value: unknown, fieldName: string): string[] {
       .filter(Boolean);
 
     if (items.length === 0) {
-      throw new Error(`${fieldName} must be a JSON array or comma-separated string.`);
+      throw new Error(
+        `${fieldName} must be a JSON array or comma-separated string.`,
+      );
     }
 
     return items;
@@ -115,7 +117,10 @@ export async function POST(req: Request) {
 
       if (!image) {
         return NextResponse.json(
-          { error: "JSON requests must include an image URL in the image field." },
+          {
+            error:
+              "JSON requests must include an image URL in the image field.",
+          },
           { status: 400 },
         );
       }
