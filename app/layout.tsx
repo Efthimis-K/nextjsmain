@@ -43,8 +43,8 @@ export default function RootLayout({
         geist.variable,
       )}
     >
-      <Navbar />
       <body className="min-h-screen flex flex-col">
+        <Navbar />
         <div className=" absolute inset-0 top-0 z-[-1] min-h-screen">
           <LightRays
             raysOrigin="top-center-offset"

@@ -1,51 +1,14 @@
 import ExploreBtn from "@/components/ExploreBtn";
 import EventCard from "@/components/EventCard";
-import { events } from "@/lib/constants";
+import { IEvent } from "@/database";
 
-// const events = [
-//   {
-//     title: "Event 1",
-//     image: "/images/event1.png",
-//     slug: "event1",
-//     location: "Location 1",
-//     date: "Date 1",
-//     time: "Time 1",
-//   },
-//   {
-//     title: "Event 2",
-//     image: "/images/event2.png",
-//     slug: "event2",
-//     location: "Location 2",
-//     date: "Date 2",
-//     time: "Time 2",
-//   },
-//   {
-//     title: "Event 3",
-//     image: "/images/event3.png",
-//     slug: "event3",
-//     location: "Location 3",
-//     date: "Date 3",
-//     time: "Time 3",
-//   },
-//   {
-//     title: "Event 4",
-//     image: "/images/event4.png",
-//     slug: "event4",
-//     location: "Location 4",
-//     date: "Date 4",
-//     time: "Time 4",
-//   },
-//   {
-//     title: "Event 5",
-//     image: "/images/event5.png",
-//     slug: "event5",
-//     location: "Location 5",
-//     date: "Date 5",
-//     time: "Time 5",
-//   },
-// ];
+// base url should be in the env file
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
-const Home = () => {
+const Home = async () => {
+  const res = await fetch(`${BASE_URL}/api/events`);
+  const data = await res.json();
+  const { events } = data;
   return (
     <section>
       <h1 className=" text-center">
@@ -62,11 +25,13 @@ const Home = () => {
         <h3>Featured Events</h3>
 
         <ul className="events">
-          {events.map((item) => (
-            <li key={item.title}>
-              <EventCard {...item} />
-            </li>
-          ))}
+          {events &&
+            events.length > 0 &&
+            events.map((item: IEvent) => (
+              <li key={item.title} className=" list-none">
+                <EventCard {...item} />
+              </li>
+            ))}
         </ul>
       </div>
     </section>
