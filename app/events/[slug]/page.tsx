@@ -1,46 +1,32 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Types } from "mongoose";
+import { Suspense } from "react";
 
-import { Event } from "@/database/event.model";
-import connectDB from "@/lib/mongodb";
 import BookEvent from "@/components/BookEvent";
 import { getSimilarEvents } from "@/lib/actions/event.actions";
 import { IEvent } from "@/database";
 import EventCard from "@/components/EventCard";
-
-// const toStringList = (value: unknown): string[] => {
-//   if (Array.isArray(value)) {
-//     // Each element might itself be a JSON-stringified array — flatten if so
-//     const result: string[] = [];
-//     for (const item of value) {
-//       const str = String(item);
-//       try {
-//         const parsed = JSON.parse(str);
-//         if (Array.isArray(parsed)) {
-//           result.push(...parsed.map(String));
-//           continue;
-//         }
-//       } catch {
-//         // not JSON, use as-is
-//       }
-//       result.push(str);
-//     }
-//     return result;
-//   }
-
-//   if (typeof value !== "string") {
-//     return [];
-//   }
-
-//   try {
-//     const parsed = JSON.parse(value);
-//     return Array.isArray(parsed) ? parsed.map(String) : [value];
-//   } catch {
-//     return [value];
-//   }
-// };
+import { cacheLife } from "next/cache";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+type EventResponse = {
+  _id: Types.ObjectId | string;
+  slug: string;
+  description: string;
+  overview: string;
+  image: string;
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  agenda: string[];
+  tags: string[];
+  mode: string;
+  audience: string;
+  organizer: string;
+};
 
 // Event tags component
 const EventTags = ({ tags }: { tags: string[] }) => {
@@ -89,31 +75,34 @@ const EventDetailItem = ({
   );
 };
 
-const EventDetailsPage = async ({
+const EventDetailsContent = async ({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) => {
+  "use cache";
+
+  cacheLife("hours");
+
   const { slug } = await params;
   const req = await fetch(`${BASE_URL}/api/events/${slug}`);
+  const { event } = (await req.json()) as { event: EventResponse };
   const {
-    event: {
-      description,
-      overview,
-      image,
-      title,
-      date,
-      time,
-      location,
-      agenda,
-      tags,
-      mode,
-      audience,
-      organizer,
-    },
-  } = await req.json();
-
-  await connectDB();
+    _id,
+    slug: eventSlug,
+    description,
+    overview,
+    image,
+    title,
+    date,
+    time,
+    location,
+    agenda,
+    tags,
+    mode,
+    audience,
+    organizer,
+  } = event;
 
   if (!description) {
     notFound();
@@ -190,7 +179,7 @@ const EventDetailsPage = async ({
               <p className=" text-sm">No spots left</p>
             )}
 
-            <BookEvent />
+            <BookEvent eventId={String(_id)} slug={slug} />
           </div>
         </aside>
       </div>
@@ -205,6 +194,24 @@ const EventDetailsPage = async ({
         </div>
       </div>
     </section>
+  );
+};
+
+const EventDetailsPage = async ({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) => {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-lg text-gray-500">Loading event details...</div>
+        </div>
+      }
+    >
+      <EventDetailsContent params={params} />
+    </Suspense>
   );
 };
 
